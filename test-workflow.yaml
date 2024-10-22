@@ -1,0 +1,33 @@
+kind: TestWorkflow
+apiVersion: testworkflows.testkube.io/v1
+metadata:
+  name: advanced-acceptance-test
+  namespace: testkube
+spec:
+  content:
+    git:
+      uri: https://github.com/mosesadelere/TestWithRobot.git
+  steps:
+  - name: Run test
+    parallel:
+      matrix:
+        customer:
+        - firstname: Jack
+          lastname: Brown
+          totalprice: "112"
+        - firstname: Jim
+          lastname: Doe
+          totalprice: "222"
+      transfer:
+      - from: /data/repo
+      container:
+        image: ppodgorsek/robot-framework:7.1.0
+      steps:
+      - shell: robot --variable firstname:{{ matrix.customer.firstname }} --variable
+          lastname:{{ matrix.customer.lastname }} --variable totalprice:{{ matrix.customer.totalprice}}
+          --outputdir /data/repo/output-{{matrix.customer.firstname}}-{{matrix.customer.lastname}}
+          /data/repo/advanced-test-restful.robot
+        artifacts:
+          paths:
+          - /data/repo/output-{{matrix.customer.firstname}}-{{matrix.customer.lastname}}/*
+status: {}
